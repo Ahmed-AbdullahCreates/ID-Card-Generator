@@ -123,7 +123,6 @@ const Index = () => {
             height: 53.98mm;
             position: relative;
             background-color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             overflow: hidden;
             page-break-inside: avoid;
           }
@@ -170,9 +169,18 @@ const Index = () => {
           .photo-text-container {
             display: flex;
             flex-direction: row;
-            justify-content: space-between;
             align-items: flex-start;
             width: 100%;
+            box-sizing: border-box;
+          }
+          .photo-container {
+            width: 75px;
+            height: 75px;
+            margin-top: -12px;
+            margin-right: 1rem;
+            overflow: hidden;
+            border: 2px solid #e0e7ff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             box-sizing: border-box;
           }
           .text-content {
@@ -185,21 +193,7 @@ const Index = () => {
             margin-bottom: 16px;
           }
           .text-content div:nth-child(2) {
-            margin-bottom: 12px;
-          }
-          .photo-container {
-            width: 75px;
-            height: 75px;
-            margin-top: -12px;
-            overflow: hidden;
-            border: 2px solid #e0e7ff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-          }
-          .photo-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            margin-bottom: 20px;
           }
           .footer {
             position: absolute;
@@ -238,12 +232,12 @@ const Index = () => {
           </div>
           <div class="main-content">
             <div class="photo-text-container">
+              ${formData.photo ? `<div class="photo-container"><img src="${formData.photo}" alt="Employee" /></div>` : ''}
               <div class="text-content">
                 ${formData.fullName ? `<div style="font-weight: 600;">Name: ${formData.fullName}</div>` : ''}
-                ${formData.employeeId ? `<div style="font-size: 12px; background-color: #4338ca; color: white; padding: 2px 12px; border-radius: 9999px; display: inline-block;">ID: ${formData.employeeId}</div>` : ''}
-                ${formData.designation && formData.designation.trim() ? `<div style="font-size: 12px; font-style: italic;">Designation: ${formData.designation}</div>` : ''}
+                ${formData.employeeId ? `<div style="font-size: 12px; color: #334155; display: inline-block;">ID: ${formData.employeeId}</div>` : ''}
+                ${formData.designation && formData.designation.trim() ? `<div style="font-size: 12px; font-style: italic; margin-top: 20px;">Designation: ${formData.designation}</div>` : ''}
               </div>
-              ${formData.photo ? `<div class="photo-container"><img src="${photoDataUrl}" alt="Employee" /></div>` : ''}
             </div>
           </div>
           <div class="footer">
@@ -355,7 +349,7 @@ const Index = () => {
           {/* Preview Section */}
           <div className="flex flex-col items-center justify-center p-6 bg-white/90 backdrop-blur-sm rounded-xl shadow-xl border-t border-blue-100">
             <h2 className="text-xl font-semibold text-slate-700 self-start mb-6">Preview</h2>
-            <div ref={cardRef} className="relative bg-white shadow-lg transition-transform hover:scale-[1.02] duration-300 rounded-md" style={{
+            <div ref={cardRef} className="relative bg-white transition-transform hover:scale-[1.02] duration-300" style={{
               width: '400px',
               height: '252px',
               aspectRatio: '1.586'
@@ -377,32 +371,32 @@ const Index = () => {
               <div className="absolute left-0 top-[30%] h-[70%] w-full p-4 bg-gradient-to-b from-indigo-50 to-blue-50">
                 {/* Top section with photo on left and name, ID to the right */}
                 <div className="flex flex-row items-start">
-                  {/* Photo on right side now, positioned higher up */}
+                  {/* Photo on left side as square */}
+                  {formData.photo && (
+                    <div className="w-[75px] h-[75px] overflow-hidden border-2 border-indigo-200 shadow-md mr-4 -mt-3">
+                      <img src={formData.photo} alt="Employee" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  
+                  {/* Text content positioned to the right of the photo */}
                   <div className="flex flex-col flex-1 justify-start mt-4">
                     {/* Name text with added space below */}
                     {formData.fullName && (
                       <div className="font-semibold text-base text-slate-800 mb-4">Name: {formData.fullName}</div>
                     )}
                     
-                    {/* ID with more space below */}
+                    {/* ID with more space below - removed background highlight */}
                     {formData.employeeId && (
-                      <div className="text-sm bg-indigo-700 text-white px-3 py-1 rounded-full inline-block mb-3">
+                      <div className="text-sm text-slate-700 inline-block mb-5">
                         ID: {formData.employeeId}
                       </div>
                     )}
                     
-                    {/* Designation text */}
+                    {/* Designation text - with increased space above */}
                     {formData.designation && (
-                      <div className="text-sm text-slate-600 italic">Designation: {formData.designation}</div>
+                      <div className="text-sm text-slate-600 italic mt-1">Designation: {formData.designation}</div>
                     )}
                   </div>
-                  
-                  {/* Photo on right side of text content */}
-                  {formData.photo && (
-                    <div className="w-[75px] h-[75px] overflow-hidden border-2 border-indigo-200 shadow-md ml-4 -mt-3">
-                      <img src={formData.photo} alt="Employee" className="w-full h-full object-cover" />
-                    </div>
-                  )}
                 </div>
                 
                 {/* Footer with year - enhanced colors */}
