@@ -106,7 +106,7 @@ const Index = () => {
         <title>Print ID Card</title>
         <style>
           @page {
-            size: 86mm 54mm landscape;
+            size: 85.6mm 53.98mm landscape;
             margin: 0;
           }
           body, html {
@@ -136,25 +136,27 @@ const Index = () => {
             display: flex;
             flex-direction: row;
             align-items: center;
-            padding: 0 1rem;
+            padding: 0 1.5rem;
             box-sizing: border-box;
           }
           .blue-section img {
             height: 80%;
             object-fit: contain;
-            margin-right: 12px;
+            margin-right: 0.75rem;
           }
-          .school-title {
+          .school-info {
             flex: 1;
             color: white;
           }
-          .school-title div:first-child {
+          .school-info .name {
             font-weight: bold;
             font-size: 16px;
+            line-height: 1.2;
           }
-          .school-title div:last-child {
+          .school-info .tel {
             font-size: 10px;
             color: #e2e8f0;
+            margin-top: 2px;
           }
           .main-content {
             position: absolute;
@@ -166,12 +168,11 @@ const Index = () => {
             background: linear-gradient(to bottom, #eef2ff, #eff6ff);
             box-sizing: border-box;
           }
-          .photo-text-container {
+          .content-row {
             display: flex;
             flex-direction: row;
             align-items: flex-start;
             width: 100%;
-            box-sizing: border-box;
           }
           .photo-container {
             width: 75px;
@@ -183,17 +184,33 @@ const Index = () => {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             box-sizing: border-box;
           }
-          .text-content {
+          .photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+          .text-container {
             flex: 1;
             display: flex;
             flex-direction: column;
             margin-top: 16px;
           }
-          .text-content div:first-child {
+          .name-text {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1e293b;
             margin-bottom: 16px;
           }
-          .text-content div:nth-child(2) {
+          .id-text {
+            font-size: 12px;
+            color: #334155;
             margin-bottom: 20px;
+          }
+          .designation-text {
+            font-size: 12px;
+            font-style: italic;
+            color: #475569;
+            margin-top: 4px;
           }
           .footer {
             position: absolute;
@@ -215,9 +232,6 @@ const Index = () => {
               print-color-adjust: exact !important;
               background-color: white;
             }
-            .card-container {
-              box-shadow: none;
-            }
           }
         </style>
       </head>
@@ -225,18 +239,18 @@ const Index = () => {
         <div class="card-container">
           <div class="blue-section">
             <img src="/uploads/fc761e83-a4e9-4270-b545-4b32eee42a09.png" alt="Logo" />
-            <div class="school-title">
-              <div>Royal American School</div>
-              <div>Tel: 025591000</div>
+            <div class="school-info">
+              <div class="name">Royal American School</div>
+              <div class="tel">Tel: 025591000</div>
             </div>
           </div>
           <div class="main-content">
-            <div class="photo-text-container">
-              ${formData.photo ? `<div class="photo-container"><img src="${formData.photo}" alt="Employee" /></div>` : ''}
-              <div class="text-content">
-                ${formData.fullName ? `<div style="font-weight: 600;">Name: ${formData.fullName}</div>` : ''}
-                ${formData.employeeId ? `<div style="font-size: 12px; color: #334155; display: inline-block;">ID: ${formData.employeeId}</div>` : ''}
-                ${formData.designation && formData.designation.trim() ? `<div style="font-size: 12px; font-style: italic; margin-top: 20px;">Designation: ${formData.designation}</div>` : ''}
+            <div class="content-row">
+              ${formData.photo ? `<div class="photo-container"><img src="${photoDataUrl}" alt="Employee" /></div>` : ''}
+              <div class="text-container">
+                ${formData.fullName ? `<div class="name-text">Name: ${formData.fullName}</div>` : ''}
+                ${formData.employeeId ? `<div class="id-text">ID: ${formData.employeeId}</div>` : ''}
+                ${formData.designation && formData.designation.trim() ? `<div class="designation-text">Designation: ${formData.designation}</div>` : ''}
               </div>
             </div>
           </div>
