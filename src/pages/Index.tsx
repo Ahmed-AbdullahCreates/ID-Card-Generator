@@ -46,25 +46,42 @@ const Index = () => {
     if (!cardRef.current) return;
     
     try {
+      // Enhanced html2canvas options for better rendering quality and accuracy
       const canvas = await html2canvas(cardRef.current, {
-        scale: 2,
+        scale: 3, // Higher scale for better quality
         backgroundColor: null,
         useCORS: true,
         allowTaint: true,
         width: cardRef.current.offsetWidth,
-        height: cardRef.current.offsetHeight
+        height: cardRef.current.offsetHeight,
+        logging: false,
+        imageTimeout: 0, // No timeout for images
+        onclone: (clonedDoc) => {
+          // Ensure fonts are loaded before rendering
+          const style = clonedDoc.createElement('style');
+          style.innerHTML = `
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+          `;
+          clonedDoc.head.appendChild(style);
+          return new Promise(resolve => setTimeout(resolve, 100));
+        }
       });
 
-      // Card dimensions in mm
+      // Card dimensions in mm (credit card proportion)
       const cardWidth = 85.60;
       const cardHeight = 53.98;
+      
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "mm",
-        format: [cardWidth, cardHeight]
+        format: [cardWidth, cardHeight],
+        compress: false
       });
       
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL('image/png', 1.0);
       pdf.addImage(imgData, 'PNG', 0, 0, cardWidth, cardHeight);
       pdf.save('id-card.pdf');
       
@@ -246,7 +263,7 @@ const Index = () => {
           </div>
           <div class="main-content">
             <div class="content-row">
-              ${formData.photo ? `<div class="photo-container"><img src="${photoDataUrl}" alt="Employee" /></div>` : ''}
+              ${formData.photo ? `<div class="photo-container"><img src="${formData.photo}" alt="Employee" /></div>` : ''}
               <div class="text-container">
                 ${formData.fullName ? `<div class="name-text">Name: ${formData.fullName}</div>` : ''}
                 ${formData.employeeId ? `<div class="id-text">ID: ${formData.employeeId}</div>` : ''}
@@ -268,65 +285,86 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 mb-3">ID Card Generator</h1>
-          <p className="text-slate-600 text-lg">Create professional ID cards with ease</p>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-slate-50 p-4 md:p-8 flex flex-col">
+      <div className="max-w-7xl mx-auto w-full flex-1">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-indigo-800 mb-3 drop-shadow-sm">ID Card Generator</h1>
+          <p className="text-slate-600 text-lg max-w-2xl mx-auto">Create professional ID cards for your staff with ease. Fill in the details, add a photo, and get print-ready cards instantly.</p>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-10">
           {/* Form Section */}
-          <Card className="p-6 shadow-xl bg-white/90 backdrop-blur-sm rounded-xl border-t border-blue-100">
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-slate-700 border-b pb-2 mb-4">Card Information</h2>
-              <div className="space-y-5">
+          <Card className="p-8 shadow-xl bg-white/90 backdrop-blur-sm rounded-xl border-t border-blue-100 hover:shadow-blue-100/20 transition-all">
+            <div className="space-y-7">
+              <div className="flex items-center space-x-2 border-b border-indigo-100 pb-4 mb-2">
+                <div className="p-2 rounded-lg bg-indigo-50">
+                  <Image className="h-5 w-5 text-indigo-600" />
+                </div>
+                <h2 className="text-xl font-semibold text-indigo-800">Card Information</h2>
+              </div>
+              
+              <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-slate-700 font-medium">Full Name</Label>
+                  <Label htmlFor="fullName" className="text-slate-700 font-medium flex items-center">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-400 mr-2"></span>
+                    Full Name
+                  </Label>
                   <Input 
                     id="fullName" 
                     name="fullName" 
                     value={formData.fullName} 
                     onChange={handleInputChange} 
                     placeholder="Enter full name"
-                    className="border-slate-200 focus:border-blue-300 transition-all"
+                    className="border-slate-200 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 transition-all"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="employeeId" className="text-slate-700 font-medium">Employee ID</Label>
+                  <Label htmlFor="employeeId" className="text-slate-700 font-medium flex items-center">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-400 mr-2"></span>
+                    Employee ID
+                  </Label>
                   <Input 
                     id="employeeId" 
                     name="employeeId" 
                     value={formData.employeeId} 
                     onChange={handleInputChange} 
                     placeholder="Enter employee ID"
-                    className="border-slate-200 focus:border-blue-300 transition-all"
+                    className="border-slate-200 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 transition-all"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="designation" className="text-slate-700 font-medium">Designation</Label>
+                  <Label htmlFor="designation" className="text-slate-700 font-medium flex items-center">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-400 mr-2"></span>
+                    Designation
+                  </Label>
                   <Input 
                     id="designation" 
                     name="designation" 
                     value={formData.designation} 
                     onChange={handleInputChange} 
                     placeholder="Enter designation"
-                    className="border-slate-200 focus:border-blue-300 transition-all"
+                    className="border-slate-200 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 transition-all"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="year" className="text-slate-700 font-medium">Year</Label>
+                  <Label htmlFor="year" className="text-slate-700 font-medium flex items-center">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-400 mr-2"></span>
+                    Year
+                  </Label>
                   <Input 
                     id="year" 
                     name="year" 
                     value={formData.year} 
                     onChange={handleInputChange} 
                     placeholder="Enter year"
-                    className="border-slate-200 focus:border-blue-300 transition-all"
+                    className="border-slate-200 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 transition-all"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="photo" className="text-slate-700 font-medium">Photo (Square image recommended)</Label>
+                  <Label htmlFor="photo" className="text-slate-700 font-medium flex items-center">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-400 mr-2"></span>
+                    Photo (Square image recommended)
+                  </Label>
                   <div className="flex gap-2 items-center">
                     <Input 
                       id="photo" 
@@ -335,25 +373,32 @@ const Index = () => {
                       ref={fileInputRef}
                       accept="image/*" 
                       onChange={handlePhotoUpload} 
-                      className="cursor-pointer border-slate-200 focus:border-blue-300 transition-all" 
+                      className="cursor-pointer border-slate-200 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 transition-all" 
                     />
                     <Button 
                       variant="outline" 
                       size="icon" 
                       onClick={() => fileInputRef.current?.click()}
                       title="Upload photo"
-                      className="hover:bg-slate-100"
+                      className="hover:bg-indigo-50 border-indigo-200"
                     >
-                      <Image className="h-4 w-4" />
+                      <Image className="h-4 w-4 text-indigo-600" />
                     </Button>
                   </div>
                 </div>
               </div>
-              <div className="flex gap-4 pt-5">
-                <Button onClick={downloadPDF} className="flex-1 bg-slate-800 hover:bg-slate-700 transition-all">
+              <div className="flex gap-4 pt-6">
+                <Button 
+                  onClick={downloadPDF} 
+                  className="flex-1 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                >
                   <Image className="h-4 w-4 mr-2" /> Download PDF
                 </Button>
-                <Button variant="outline" onClick={handlePrint} className="flex-1 border-slate-300 hover:bg-slate-100 transition-all">
+                <Button 
+                  variant="outline" 
+                  onClick={handlePrint} 
+                  className="flex-1 border-indigo-200 hover:bg-indigo-50 text-indigo-700 hover:text-indigo-800 transition-all duration-200 font-medium"
+                >
                   <Printer className="h-4 w-4 mr-2" /> Print
                 </Button>
               </div>
@@ -361,69 +406,99 @@ const Index = () => {
           </Card>
 
           {/* Preview Section */}
-          <div className="flex flex-col items-center justify-center p-6 bg-white/90 backdrop-blur-sm rounded-xl shadow-xl border-t border-blue-100">
-            <h2 className="text-xl font-semibold text-slate-700 self-start mb-6">Preview</h2>
-            <div ref={cardRef} className="relative bg-white transition-transform hover:scale-[1.02] duration-300" style={{
-              width: '400px',
-              height: '252px',
-              aspectRatio: '1.586'
-            }}>
-              {/* Rest of the ID card remains the same */}
-              {/* Blue Header - with enhanced gradient */}
-              <div className="absolute top-0 left-0 w-full h-[30%] flex flex-row items-center px-6 bg-gradient-to-r from-indigo-800 via-blue-700 to-indigo-600">
-                <img alt="School Logo" src="/uploads/fc761e83-a4e9-4270-b545-4b32eee42a09.png" className="h-4/5 object-contain mr-3" />
-                <div className="flex-1">
-                  <div className="font-bold text-lg text-white">Royal American School</div>
-                  <div className="text-xs text-slate-200">Tel: 025591000</div>
+          <Card className="p-8 shadow-xl bg-white/90 backdrop-blur-sm rounded-xl border-t border-blue-100 hover:shadow-blue-100/20 transition-all">
+            <div className="space-y-7">
+              <div className="flex items-center space-x-2 border-b border-indigo-100 pb-4 mb-2">
+                <div className="p-2 rounded-lg bg-indigo-50">
+                  <Printer className="h-5 w-5 text-indigo-600" />
                 </div>
-                <div className="text-right text-white">
-                  {/* Empty div to maintain spacing */}
-                </div>
+                <h2 className="text-xl font-semibold text-indigo-800">Preview</h2>
               </div>
-
-              {/* Main Content Area - with more consistent color scheme */}
-              <div className="absolute left-0 top-[30%] h-[70%] w-full p-4 bg-gradient-to-b from-indigo-50 to-blue-50">
-                {/* Top section with photo on left and name, ID to the right */}
-                <div className="flex flex-row items-start">
-                  {/* Photo on left side as square */}
-                  {formData.photo && (
-                    <div className="w-[75px] h-[75px] overflow-hidden border-2 border-indigo-200 shadow-md mr-4 -mt-3">
-                      <img src={formData.photo} alt="Employee" className="w-full h-full object-cover" />
-                    </div>
-                  )}
+              
+              <div className="flex justify-center items-center">
+                <div className="relative">
+                  {/* Card shadow effect */}
+                  <div className="absolute inset-0 -bottom-4 -right-4 bg-gradient-to-br from-indigo-200 to-blue-300 rounded-lg opacity-30 blur-xl"></div>
                   
-                  {/* Text content positioned to the right of the photo */}
-                  <div className="flex flex-col flex-1 justify-start mt-4">
-                    {/* Name text with added space below */}
-                    {formData.fullName && (
-                      <div className="font-semibold text-base text-slate-800 mb-4">Name: {formData.fullName}</div>
-                    )}
-                    
-                    {/* ID with more space below - removed background highlight */}
-                    {formData.employeeId && (
-                      <div className="text-sm text-slate-700 inline-block mb-5">
-                        ID: {formData.employeeId}
+                  {/* Card preview */}
+                  <div ref={cardRef} className="relative bg-white transition-transform hover:scale-[1.02] duration-300 z-10" style={{
+                    width: '400px',
+                    height: '252px',
+                    aspectRatio: '1.586'
+                  }}>
+                    {/* Blue Header - with enhanced gradient */}
+                    <div className="absolute top-0 left-0 w-full h-[30%] flex flex-row items-center px-6 bg-gradient-to-r from-indigo-800 via-blue-700 to-indigo-600">
+                      <img alt="School Logo" src="/uploads/fc761e83-a4e9-4270-b545-4b32eee42a09.png" className="h-4/5 object-contain mr-3" />
+                      <div className="flex-1">
+                        <div className="font-bold text-lg text-white">Royal American School</div>
+                        <div className="text-xs text-slate-200">Tel: 025591000</div>
                       </div>
-                    )}
-                    
-                    {/* Designation text - with increased space above */}
-                    {formData.designation && (
-                      <div className="text-sm text-slate-600 italic mt-1">Designation: {formData.designation}</div>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Footer with year - enhanced colors */}
-                <div className="absolute bottom-0 left-0 w-full bg-gradient-to-r from-indigo-800 to-indigo-600 py-1 px-3">
-                  <div className="text-xs text-white text-center">
-                    © {formData.year} Royal American School
+                      <div className="text-right text-white">
+                        {/* Empty div to maintain spacing */}
+                      </div>
+                    </div>
+
+                    {/* Main Content Area - with more consistent color scheme */}
+                    <div className="absolute left-0 top-[30%] h-[70%] w-full p-4 bg-gradient-to-b from-indigo-50 to-blue-50">
+                      {/* Top section with photo on left and name, ID to the right */}
+                      <div className="flex flex-row items-start">
+                        {/* Photo on left side as square */}
+                        {formData.photo && (
+                          <div className="w-[75px] h-[75px] overflow-hidden border-2 border-indigo-200 shadow-md mr-4 -mt-3">
+                            <img src={formData.photo} alt="Employee" className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        
+                        {/* Text content positioned to the right of the photo */}
+                        <div className="flex flex-col flex-1 justify-start mt-4">
+                          {/* Name text with added space below */}
+                          {formData.fullName && (
+                            <div className="font-semibold text-base text-slate-800 mb-4">Name: {formData.fullName}</div>
+                          )}
+                          
+                          {/* ID with more space below - removed background highlight */}
+                          {formData.employeeId && (
+                            <div className="text-sm text-slate-700 inline-block mb-5">
+                              ID: {formData.employeeId}
+                            </div>
+                          )}
+                          
+                          {/* Designation text - with increased space above */}
+                          {formData.designation && (
+                            <div className="text-sm text-slate-600 italic mt-1">Designation: {formData.designation}</div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Footer with year - enhanced colors */}
+                      <div className="absolute bottom-0 left-0 w-full bg-gradient-to-r from-indigo-800 to-indigo-600 py-1 px-3">
+                        <div className="text-xs text-white text-center">
+                          © {formData.year} Royal American School
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
+      
+      {/* Website Footer */}
+      {/* <footer className="mt-16 border-t border-indigo-100 pt-8 pb-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center mb-4 md:mb-0">
+              <img src="D:\Work\work\staff card genrator\card-craft-previewer-main\src\uploads\logo.png" alt="Logo" className="h-8 w-auto mr-2" />
+              <span className="text-indigo-800 font-semibold">Royal American School</span>
+            </div>
+            <div className="text-slate-500 text-sm">
+              © {new Date().getFullYear()} Royal American School. All rights reserved.
+            </div>
+          </div>
+        </div>
+      </footer> */}
     </div>
   );
 };
